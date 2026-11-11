@@ -44,3 +44,13 @@ body .eyebrow,body .composer-topline>span:nth-child(2){letter-spacing:.9px}
  body .hero-examples button{padding-inline:12px}
  body .nav-actions .text-btn,body .text-link,body .publisher-link{display:inline-flex;align-items:center}
 }
+/* Verificación en navegador: textos y controles que seguían por debajo del mínimo. */
+body .job-tag,body .publisher-link,body .trust-list p span,body .trust-list small,body footer p,body footer>span,body .rules-footer,body .mobile-nav>a,body .mobile-nav>button{font-size:11px}
+@media(pointer:coarse),(max-width:650px){
+ body .job-open,body .role-switch button,body .rules-footer,body .search input,body .mobile-nav>a,body .mobile-nav>button,body .mobile-nav>button[data-action="publish"]{min-height:44px}
+ body header .brand,body footer .brand{min-height:44px;display:inline-flex;align-items:center}
+ body .role-switch button{display:inline-flex;align-items:center}
+}
+@media(max-width:380px){body .hero-actions{flex-wrap:wrap}body .hero-actions .btn,body .hero-actions .outline-btn{flex:1 1 100%;justify-content:space-between}}
+body .modal-head .eyebrow,body #modalEyebrow,body .application-context span,body .application-limit-note,body .notice,body .demo-inline{font-size:11px}
+@media(pointer:coarse),(max-width:650px){body dialog .field input,body dialog .field select{min-height:44px}}

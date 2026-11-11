@@ -42,12 +42,13 @@ function signInView(intent,id=''){
  $('#browseWithoutAccount').onclick=()=>modal.close();
 }
 function renderAccount(){
- document.querySelectorAll('[data-action="login"]').forEach(b=>{b.classList.toggle('hidden',!!actor());b.textContent='Ingresar'});
+ document.querySelectorAll('[data-action="login"]').forEach(b=>{if(b.closest('.mobile-nav'))return;b.classList.toggle('hidden',!!actor());b.textContent='Ingresar'});
  document.querySelectorAll('[data-action="activity"],[data-action="profile"]').forEach(b=>{if(b.closest('header'))b.classList.toggle('hidden',!actor())});
  $('#activityBadge')?.classList.add('hidden');
  // Con sesión, la barra inferior del celular lleva a Mi actividad (Mi perfil sigue arriba en el encabezado).
- const navAccount=document.querySelector('.mobile-nav [data-action="profile"],.mobile-nav [data-action="activity"]');
- if(navAccount){const signed=!!actor();navAccount.dataset.action=signed?'activity':'profile';const text=[...navAccount.childNodes].find(n=>n.nodeType===3);if(text)text.textContent=signed?'Mi actividad':'Mi perfil';const svg=navAccount.querySelector('svg');if(svg)svg.innerHTML=signed?'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/>':'<circle cx="12" cy="7" r="4"/><path d="M4 22v-3a8 8 0 0 1 16 0v3"/>'}
+ // Sin sesión (o con la API caída) dice "Ingresar", para no mostrar "Ingresar" y "Mi perfil" a la vez.
+ const navAccount=document.querySelector('.mobile-nav [data-action="profile"],.mobile-nav [data-action="activity"],.mobile-nav [data-action="login"]');
+ if(navAccount){const signed=!!actor();navAccount.dataset.action=signed?'activity':'login';navAccount.classList.remove('hidden');navAccount.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">'+(signed?'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/>':'<circle cx="12" cy="7" r="4"/><path d="M4 22v-3a8 8 0 0 1 16 0v3"/>')+'</svg>'+(signed?'Mi actividad':'Ingresar')}
 }
 async function refreshSession(){const params=new URLSearchParams();const job=new URLSearchParams(location.search).get('job');if(job)params.set('job',job);const filters=typeof listingParams==='function'?listingParams():new URLSearchParams();if(job)filters.set('job',job);setState(await api('/api/state?'+filters));}
 async function bootstrap(){
@@ -120,6 +121,6 @@ function renderPagination(){
   holder(el).insertAdjacentElement('afterend',p);el.dataset.errorId=id;el.setAttribute('aria-invalid','true');el.setAttribute('aria-describedby',((el.getAttribute('aria-describedby')||'')+' '+id).trim());
   if(!focused){focused=true;el.focus({preventScroll:true});el.scrollIntoView({block:'center',behavior:'smooth'});queueMicrotask(()=>setTimeout(()=>focused=false))}
  },true);
- const revalidate=e=>{const el=e.target;if(el?.dataset?.errorId&&el.validity?.valid)clear(el)};
+ const revalidate=e=>{const el=e.target;if(!el?.dataset?.errorId)return;if(el.validity?.valid)clear(el);else{const p=document.getElementById(el.dataset.errorId);if(p)p.textContent=message(el)}};
  document.addEventListener('input',revalidate,true);document.addEventListener('change',revalidate,true);
 })();
