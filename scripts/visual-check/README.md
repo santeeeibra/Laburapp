@@ -3,7 +3,7 @@
 Repite con un comando la verificación visual de LABURAPP en 6 tamaños (390×844, 360×800, 844×390, 768×1024, 1366×768 y 1920×1080).
 
 ```bash
-npm i -D playwright && npx playwright install chromium   # una sola vez
+npm install && npx playwright install chromium   # una sola vez (Playwright 1.63.0 está en devDependencies)
 npm run check:visual                                       # capturas y reporte en .visual-check/
 npm run check:visual -- --out docs/capturas-verificacion/pantallas/despues
 ```
@@ -15,7 +15,7 @@ npm run check:visual -- --out docs/capturas-verificacion/pantallas/despues
 - Para mirar el sitio a mano: `node scripts/visual-check/server.mjs 4321`.
 
 ## Qué revisa
-- 17 pantallas: portada, detalle sin cuenta, perfil propio y público, los seis pasos de la publicación asistida, Mi actividad (publicaciones y postulaciones), candidatos y preselección, conversación (de cada lado) y propuesta de acuerdo.
+- 17 pantallas: portada, detalle sin cuenta, perfil propio y público, los seis pasos de la publicación asistida, Mi actividad (publicaciones y postulaciones), candidatos, la pestaña Preselección (`manageJob(id, 'shortlist')`, verificando que solo muestre preseleccionados), conversación (de cada lado) y propuesta de acuerdo.
 - Ningún texto por debajo de 11 px.
 - Controles de al menos 44 px en celular y tablet (táctiles) y de al menos 24 px en computadora (WCAG 2.5.8). Quedan exceptuados los enlaces dentro de un párrafo.
 - Sin desborde horizontal ni errores de JavaScript.

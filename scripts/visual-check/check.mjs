@@ -3,11 +3,11 @@
 //      npm run check:visual -- --out docs/capturas-verificacion/pantallas
 //      npm run check:visual -- --url http://127.0.0.1:4321   (usar un servidor local ya levantado)
 // Solo acepta URLs locales: nunca corre contra producción.
-// Requiere Playwright con Chromium (npm i -D playwright && npx playwright install chromium).
+// Requiere las dependencias de desarrollo (npm install) y Chromium (npx playwright install chromium).
 import {createRequire} from 'node:module';import {mkdirSync,writeFileSync} from 'node:fs';import {resolve} from 'node:path';
 import {startServer} from './server.mjs';
 const require=createRequire(import.meta.url);let chromium;
-try{({chromium}=require('playwright'))}catch{console.error('Falta Playwright. Instalalo con: npm i -D playwright && npx playwright install chromium');process.exit(2)}
+try{({chromium}=require('playwright'))}catch{console.error('Falta Playwright. Corré: npm install && npx playwright install chromium');process.exit(2)}
 const arg=n=>{const i=process.argv.indexOf(n);return i>0?process.argv[i+1]:null};
 const OUT=resolve(arg('--out')||'.visual-check');mkdirSync(OUT,{recursive:true});
 let BASE=arg('--url'),server;
@@ -50,7 +50,11 @@ const SCREENS=[
  {id:'mi-actividad-publicaciones',user:'owner',open:`activityView('owner')`},
  {id:'mi-actividad-postulaciones',user:'worker',open:`activityView('worker')`},
  {id:'candidatos',user:'owner',open:`manageJob(${firstJob('Pintar')})`,scrollTo:'.candidate-card'},
- {id:'candidatos-preseleccion',user:'owner',open:`manageJob(${firstJob('Pintar')})`,scrollTo:'.shortlist-button'},
+ {id:'candidatos-preseleccion',user:'owner',open:`manageJob(${firstJob('Pintar')},'shortlist')`,scrollTo:'.candidate-card',
+  // Debe abrir la pestaña Preselección y mostrar solo candidatos preseleccionados (con su control para quitarlos).
+  expect:()=>{const d=document.querySelector('dialog[open]'),cards=[...d.querySelectorAll('.candidate-card')],tab=d.querySelector('[data-inbox="shortlist"]'),out=[];
+   if(!tab?.classList.contains('active'))out.push('la pestaña Preselección no está activa');if(!cards.length)out.push('no hay candidatos preseleccionados');
+   for(const c of cards){if(!/Preseleccionado/.test(c.querySelector('.status-pill')?.textContent||''))out.push('aparece un candidato no preseleccionado');if(!c.querySelector('[data-shortlist]')?.textContent.includes('Quitar de preselección'))out.push('falta “Quitar de preselección”')}return out}},
  {id:'conversacion-quien-publica',user:'owner',open:`chat(${appOf('worker')})`},
  {id:'conversacion-postulante',user:'worker',open:`chat(${appOf('worker')})`},
  {id:'proponer-acuerdo',user:'owner',open:`proposeView(${appOf('worker2')})`},
@@ -69,6 +73,7 @@ for(const vp of VIEWPORTS){const key=vp.w+'x'+vp.h,r=report[key]={screens:{}};co
   if(s.scrollTo)await p.evaluate(sel=>document.querySelector('dialog[open] '+sel)?.scrollIntoView({block:'center'}),s.scrollTo);
   await p.waitForTimeout(150);
   const m=await p.evaluate(measure,{minTarget,minText:MIN_TEXT});m.errors=errors;r.screens[s.id]=m;
+  if(s.expect){m.expect=await p.evaluate(s.expect);if(m.expect.length)fail(key,s.id+': contenido inesperado',m.expect)}
   if(m.text.length)fail(key,s.id+': texto < '+MIN_TEXT+'px',m.text);if(m.targets.length)fail(key,s.id+': control < '+minTarget+'px',m.targets);
   if(m.overflowX)fail(key,s.id+': desborde horizontal',[m.overflowX+'px']);if(errors.length)fail(key,s.id+': error de JavaScript',errors);
   await p.screenshot({path:`${OUT}/${s.id}-${key}.png`});await c.close()}
@@ -106,7 +111,7 @@ await browser.close();server?.close();
 
 writeFileSync(`${OUT}/reporte.json`,JSON.stringify({base:BASE,failures,report},null,1));
 const lines=['| Tamaño | '+SCREENS.map(s=>s.id).join(' | ')+' |','|---|'+SCREENS.map(()=>'---').join('|')+'|'];
-for(const k in report)lines.push('| '+k+' | '+SCREENS.map(s=>{const m=report[k].screens[s.id];return m.text.length||m.targets.length||m.overflowX||m.errors.length?'❌':'✅'}).join(' | ')+' |');
+for(const k in report)lines.push('| '+k+' | '+SCREENS.map(s=>{const m=report[k].screens[s.id];return m.text.length||m.targets.length||m.overflowX||m.errors.length||m.expect?.length?'❌':'✅'}).join(' | ')+' |');
 writeFileSync(`${OUT}/reporte.md`,lines.join('\n')+'\n\n'+(failures.length?failures.map(f=>`- **${f.vp}** ${f.what}: ${f.detail.join('; ')}`).join('\n'):'Sin fallas.')+'\n');
 console.log(lines.join('\n'));console.log(failures.length?`\n${failures.length} fallas:\n`+failures.map(f=>`- ${f.vp} ${f.what}: ${f.detail.slice(0,6).join('; ')}${f.detail.length>6?' …':''}`).join('\n'):'\nSin fallas.');
 console.log('\nCapturas y reporte en',OUT);process.exit(failures.length?1:0);
