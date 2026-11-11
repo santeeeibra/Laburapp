@@ -19,3 +19,28 @@
 .candidate-top>div{min-width:0}.candidate-card{overflow-wrap:anywhere}.job-social{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:0 0 15px;margin-top:auto}.job-bottom{margin-top:0}.like-button,.like-count{display:inline-flex;align-items:center;gap:6px;color:#7a8da3;font-size:11px;background:transparent;padding:7px 0;white-space:nowrap;min-height:34px}.like-button svg,.like-count svg{width:17px;height:17px;flex-shrink:0}.like-button.liked{color:#b74e69}.like-button.liked svg{fill:#fae5ed;stroke:#b74e69}.like-button:hover{color:#b74e69}.publisher-link{font-size:10px;line-height:1.6;color:#6682a2;background:transparent;padding:8px 0;text-align:right}.detail-social{display:flex;align-items:center;justify-content:space-between;gap:10px;border-block:1px solid #e1eaf5;padding:7px 0;margin:18px 0 23px}.detail-social .text-link{margin:0;font-size:11px}.declared-skills{background:#edf4fe;padding:13px;border-radius:8px;margin-bottom:22px}.declared-skills>span{font-size:10px;color:#7e98b5}.declared-skills p{font-size:12px;color:#4f749f;line-height:1.8;margin-top:6px}@media(max-width:650px){.job-social{gap:9px;padding-bottom:12px}.publisher-link{font-size:10px;max-width:155px}.like-button,.like-count{font-size:11px}.detail-social{flex-wrap:wrap}.detail-social .text-link{font-size:11px}}
 
 .auth-symbol{width:58px;height:58px;background:#e8f2e9;border-radius:18px;display:grid;place-items:center;font-size:30px;color:#205941;margin-bottom:24px}.auth-benefits{background:#f5f7f2;border-radius:16px;padding:15px 22px;margin:24px 0}.auth-benefits p{margin:9px 0;color:#315b45;font-size:14px}.signout-link{display:block;margin-top:22px}.load-more{display:block;margin:28px auto}.share-changa{margin:6px 0 16px}.auth-benefits+.btn{text-align:center}.hidden{display:none!important}
+
+/* Auditoría visual · mejoras prioritarias (foco, errores, legibilidad y tamaños táctiles). */
+:root{--focus:#0f3563;--focus-halo:#ffdc64}
+/* 1. Foco visible y con contraste suficiente sobre cualquier fondo. */
+body button:focus-visible,body a:focus-visible,body select:focus-visible,body summary:focus-visible,body [tabindex]:focus-visible,body .hero-assist button:focus-visible,body .choice:focus-visible{outline:3px solid var(--focus);outline-offset:3px;box-shadow:0 0 0 7px var(--focus-halo)}
+body input:not([type=checkbox]):not([type=radio]):focus-visible,body textarea:focus-visible,body .hero-textarea-wrap textarea:focus,body .idea-input:focus{outline:3px solid var(--focus);outline-offset:1px}
+body input[type=checkbox]:focus-visible,body input[type=radio]:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+body .choice-radio input:focus-visible+span,body .skills-options input:focus-visible+span{outline:3px solid var(--focus);outline-offset:2px;box-shadow:0 0 0 7px var(--focus-halo)}
+body .search input:focus-visible,body .search select:focus-visible{outline:0;box-shadow:none}
+body .search:focus-within{border-color:var(--focus);box-shadow:0 0 0 3px var(--focus),0 0 0 7px var(--focus-halo)}
+/* 2. Mensajes de validación propios. */
+.field-error{color:#a3312c;font-size:13px;line-height:1.5;margin:6px 0 12px;display:flex;gap:6px;align-items:flex-start}
+.field-error:before{content:"!";flex:0 0 18px;height:18px;border-radius:50%;background:#a3312c;color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center;margin-top:1px}
+[aria-invalid=true]{border-color:#a3312c!important;background:#fff8f7}
+/* 5. Ningún texto por debajo de 11 px. */
+body .eyebrow,body .hero-copy>.eyebrow,body .composer-topline,body .composer-topline>span,body .composer-topline>span:nth-child(2),body .composer-demo,body .detection-badge,body .composer-bottom,body .mini-check,body .hero-note,body .hero-detection span:not(.detection-badge),body .hero-detection small,body .hero-examples button,body .demo-badge,body .demo-footnote{font-size:11px}
+body .eyebrow,body .composer-topline>span:nth-child(2){letter-spacing:.9px}
+@media(max-width:650px){body .hero-actions .btn,body .hero-actions .outline-btn{font-size:13px;padding-inline:12px;gap:8px}}
+/* 5. Tamaños táctiles de al menos 44 px en pantallas táctiles. */
+@media(pointer:coarse),(max-width:650px){
+ body .category,body .hero-examples button,body .nav-actions .text-btn,body .text-link,body .like-button,body .publisher-link,body .search select,body .search .btn,body #duration,body .danger-link,body .wizard-back,body .close{min-height:44px}
+ body .close{min-width:44px}
+ body .hero-examples button{padding-inline:12px}
+ body .nav-actions .text-btn,body .text-link,body .publisher-link{display:inline-flex;align-items:center}
+}

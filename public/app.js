@@ -45,9 +45,13 @@ function renderAccount(){
  document.querySelectorAll('[data-action="login"]').forEach(b=>{b.classList.toggle('hidden',!!actor());b.textContent='Ingresar'});
  document.querySelectorAll('[data-action="activity"],[data-action="profile"]').forEach(b=>{if(b.closest('header'))b.classList.toggle('hidden',!actor())});
  $('#activityBadge')?.classList.add('hidden');
+ // Con sesión, la barra inferior del celular lleva a Mi actividad (Mi perfil sigue arriba en el encabezado).
+ const navAccount=document.querySelector('.mobile-nav [data-action="profile"],.mobile-nav [data-action="activity"]');
+ if(navAccount){const signed=!!actor();navAccount.dataset.action=signed?'activity':'profile';const text=[...navAccount.childNodes].find(n=>n.nodeType===3);if(text)text.textContent=signed?'Mi actividad':'Mi perfil';const svg=navAccount.querySelector('svg');if(svg)svg.innerHTML=signed?'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/>':'<circle cx="12" cy="7" r="4"/><path d="M4 22v-3a8 8 0 0 1 16 0v3"/>'}
 }
 async function refreshSession(){const params=new URLSearchParams();const job=new URLSearchParams(location.search).get('job');if(job)params.set('job',job);const filters=typeof listingParams==='function'?listingParams():new URLSearchParams();if(job)filters.set('job',job);setState(await api('/api/state?'+filters));}
 async function bootstrap(){
+ renderAccount();
  $('#jobs').innerHTML='<div class="empty"><p>Cargando oportunidades…</p></div>';
  try{
  await refreshSession();ready=true;loadAccountDraft();
@@ -55,7 +59,7 @@ async function bootstrap(){
  const resume=params.get('resume'),job=params.get('job'),person=params.get('person');
  if(resume&&actor()){if(resume==='profile'&&person)publicProfile(person,()=>modal.close());else if(resume==='apply'&&job)apply(job);else if(resume==='publish')publish();else if(resume==='activity')activityView();else if(resume==='account')profileView();else if(job)detail(job);history.replaceState(null,'','/'+(job?'?job='+encodeURIComponent(job):'')+'#changas')}
  else if(job)detail(job);
- }catch(e){$('#resultCount').textContent='';$('#jobs').innerHTML='<div class="empty"><h3>No pudimos cargar las changas.</h3><p>Tu conexión o el servicio pueden estar temporalmente fuera de línea.</p><button class="btn" id="retryLoad">Volver a intentar</button></div>';$('#retryLoad').onclick=bootstrap;toast(e.message)}
+ }catch(e){$('#resultCount').textContent='';$('#jobs').innerHTML='<div class="empty"><h3>No pudimos cargar las changas.</h3><p>Tu conexión o el servicio pueden estar temporalmente fuera de línea.</p><button class="btn" id="retryLoad">Volver a intentar</button></div>';$('#retryLoad').onclick=bootstrap}
 }
 window.addEventListener('DOMContentLoaded',bootstrap);
 window.addEventListener('focus',async()=>{if(ready&&!modal.open&&!mutationPending){try{await refreshSession()}catch{ /* Keep the current list and explicit retry available. */ }}});
@@ -101,3 +105,21 @@ function renderPagination(){
  button=document.createElement('button');button.id='loadMore';button.className='outline-btn load-more';button.textContent='Ver más changas →';$('#jobs').after(button);
  button.onclick=async()=>{button.disabled=true;try{const more=await api('/api/state?'+listingParams()+'&before='+encodeURIComponent(state.nextCursor));const jobs=[...new Map([...state.jobs,...more.jobs].map(j=>[j.id,j])).values()];setState({...more,jobs})}catch(e){toast(e.message);button.disabled=false}};
 }
+
+// Mensajes de validación propios, en castellano y debajo de cada campo, en lugar del globo del navegador.
+(()=>{
+ let focused=false;
+ const message=el=>{const v=el.validity;if(v.valueMissing)return el.type==='checkbox'?'Marcá esta casilla para continuar.':el.tagName==='SELECT'?'Elegí una opción.':el.type==='file'?'Elegí un archivo.':'Completá este campo.';
+  if(v.tooShort)return `Escribí al menos ${el.minLength} caracteres (llevás ${el.value.trim().length}).`;if(v.tooLong)return `Usá como máximo ${el.maxLength} caracteres.`;
+  if(v.typeMismatch)return el.type==='email'?'Revisá el correo.':'Revisá el formato.';if(v.rangeUnderflow||v.rangeOverflow||v.badInput||v.stepMismatch)return 'Revisá el número.';if(v.patternMismatch)return el.title||'Revisá el formato.';return el.validationMessage||'Revisá este dato.'};
+ const holder=el=>el.closest('.field,.consent-check,label')||el;
+ const clear=el=>{el.removeAttribute('aria-invalid');const id=el.dataset.errorId;if(id){document.getElementById(id)?.remove();el.setAttribute('aria-describedby',(el.getAttribute('aria-describedby')||'').split(' ').filter(x=>x&&x!==id).join(' '));delete el.dataset.errorId;if(!el.getAttribute('aria-describedby'))el.removeAttribute('aria-describedby')}};
+ document.addEventListener('invalid',e=>{
+  const el=e.target;if(!(el instanceof HTMLElement)||!el.form)return;e.preventDefault();clear(el);
+  const id='err-'+Math.random().toString(36).slice(2,9),p=document.createElement('p');p.className='field-error';p.id=id;p.textContent=message(el);
+  holder(el).insertAdjacentElement('afterend',p);el.dataset.errorId=id;el.setAttribute('aria-invalid','true');el.setAttribute('aria-describedby',((el.getAttribute('aria-describedby')||'')+' '+id).trim());
+  if(!focused){focused=true;el.focus({preventScroll:true});el.scrollIntoView({block:'center',behavior:'smooth'});queueMicrotask(()=>setTimeout(()=>focused=false))}
+ },true);
+ const revalidate=e=>{const el=e.target;if(el?.dataset?.errorId&&el.validity?.valid)clear(el)};
+ document.addEventListener('input',revalidate,true);document.addEventListener('change',revalidate,true);
+})();
