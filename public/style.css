@@ -69,4 +69,4 @@ body .text-link,body .report-link,body header nav a,body .search select,body #du
 body .text-link,body .report-link,body header nav a{display:inline-flex;align-items:center}
 body .signout-link{display:flex}
 @media(pointer:coarse),(max-width:650px){body .report-link,body .text-link,body .search select,body #duration{min-height:44px}}
-body .candidate-top .status-pill{overflow-wrap:normal;white-space:nowrap;flex-shrink:0}
+body .candidate-top{flex-wrap:wrap;row-gap:8px}body .candidate-top .status-pill{overflow-wrap:normal;white-space:nowrap;flex-shrink:0}
