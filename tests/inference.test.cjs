@@ -1,0 +1,7 @@
+const assert=require('node:assert/strict');const {infer}=require('../public/inference.js');
+let r=infer('NECESITO QUE SE PINTE UNA PARED');assert.equal(r.trade,'pintura');assert.equal(r.title,'Pintar una pared');assert.equal(r.pay,null);assert.equal(r.zone,'');
+r=infer('Necesito pintar una pared en Villa Mitre mañana, 4 horas, pago $30.000');assert.equal(r.zone,'Villa Mitre');assert.equal(r.pay,30000);assert.equal(r.when,'manana');assert.equal(r.duration,'hours');
+assert.equal(infer('Busco plomero, ofrezco 35 mil pesos').pay,35000);assert.equal(infer('Limpiar un departamento por 4 horas').pay,null);assert.equal(infer('Necesito electricista, pago a convenir').payMode,'quote');assert.equal(infer('No necesito pintar, necesito arreglar un enchufe').trade,'electricidad');assert.equal(infer('Pintar y limpiar la casa').trade,'');assert.equal(infer('Pintar y limpiar la casa').matches.length,2);assert.equal(infer('Necesito una mano con algo').trade,'');assert.equal(infer('Cortar el césped en Grünbein el sábado').zone,'Grünbein');assert.equal(infer('Necesito mover muebles el viernes de 9 a 13').when,'el viernes · de 9 a 13');assert.equal(infer('Busco mozo por un día').duration,'day');assert.equal(infer('Pintar una pared de 30 metros').pay,null);assert.equal(infer('limpieza por $25.500,50').pay,25500.5);
+assert.equal(infer('Busco limpieza, pago $5000 por hora').payUnit,'por hora');
+assert.equal(infer('Pintura, presupuesto de 4 horas').pay,null);
+console.log('16 casos de interpretación verificados.');
